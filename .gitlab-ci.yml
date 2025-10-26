@@ -1,0 +1,46 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+
+test:
+  stage: test
+  image: python:3.11-slim
+  script:
+    - pip install -r requirements.txt
+    - pytest -q
+  artifacts:
+    when: always
+    reports:
+      junit: junit.xml
+
+build:
+  stage: build
+  image: python:3.11-slim
+  needs: ["test"]
+  script:
+    - python -V
+    - echo "Build step (placeholder)"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+  artifacts:
+    paths:
+      - dist/
+    when: on_success
+
+deploy:
+  stage: deploy
+  image: alpine:3.20
+  needs: ["build"]
+  script:
+    - echo "Deploy step (manual) — ใส่คำสั่งจริงได้ เช่น rsync/scp ไป VM หรือ GitLab Pages"
+  when: manual
+  environment:
+    name: staging
